@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gundam Store & A.I Assistant - Đồ Án Tốt Nghiệp</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <div class="logo-section" onclick="switchTab('store')">
+                <div class="logo-icon">G</div>
+                <div class="logo-text">
+                    <h1>MECHA STORE</h1>
+                    <span>A.I E-COMMERCE</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar-container">
+                <div class="search-input-wrapper">
+                    <input type="text" id="main-search-input" placeholder="Tìm tên mô hình, series Anime (Ví dụ: Aerial, Barbatos...)...">
+                    <div class="search-actions">
+                        <button class="visual-search-trigger" onclick="triggerVisualSearch()" title="Tìm kiếm bằng Hình ảnh A.I">
+                            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4 4h3V2H4c-1.1 0-2 .9-2 2v3h2V4zm16-2h-3v2h3v3h2V4c0-1.1-.9-2-2-2zm2 16h-2v3h-3v2h4c1.1 0 2-.9 2-2v-3zM4 17H2v4c0 1.1.9 2 2 2h3v-2H4v-3zm8-9c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                            </svg>
+                        </button>
+                        <button class="search-btn">
+                            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="nav-actions" style="display: flex; gap: 1.2rem; align-items: center;">
+                <a class="nav-link active" id="store-nav-link" onclick="showAllProducts()">Cửa hàng</a>
+                <a class="nav-link" id="admin-nav-link" onclick="switchTab('admin')" style="display: none;">Quản trị Admin</a>
+                
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle-btn" class="cart-icon-wrapper" onclick="toggleTheme()" title="Đổi Chế độ Sáng / Tối">
+                    <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41zm-12.37 12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41z"/>
+                    </svg>
+                </button>
+
+                <div class="cart-icon-wrapper" onclick="openModal('cart-modal')">
+                    <svg style="width:22px;height:22px;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <div class="cart-count" id="cart-count-badge">0</div>
+                </div>
+                <div id="auth-section" style="display: flex; align-items: center; gap: 0.8rem;">
+                    <span id="user-display-name" style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600; display: none;"></span>
+                    <button id="login-nav-btn" class="add-to-cart-btn" onclick="window.location.href='login.html'">Đăng nhập</button>
+                    <button id="logout-nav-btn" class="btn-small btn-delete" style="display: none; padding: 0.4rem 0.8rem; font-family: var(--font-outfit);" onclick="handleLogout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sub-Navigation Bar -->
+        <div class="sub-navbar">
+            <div class="sub-nav-container">
+                <div class="sub-nav-links">
+                    <div class="sub-nav-item has-dropdown" onclick="toggleDropdown(event, this)">
+                        <span>BANDAI</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Gundam', event)">Gundam (Gunpla)</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Dragon Ball', event)">Dragon Ball</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('One Piece', event)">One Piece</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Naruto', event)">Naruto</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Pokemon', event)">Pokemon</div>
+                        </div>
+                    </div>
+                    <div class="sub-nav-item" onclick="filterSubNav('Dụng cụ')">
+                        <span>Dụng cụ</span>
+                    </div>
+                    <div class="sub-nav-item" onclick="filterSubNav('Phụ kiện')">
+                        <span>Phụ kiện – Giá đỡ</span>
+                    </div>
+                    <div class="sub-nav-item has-dropdown" onclick="toggleDropdown(event, this)">
+                        <span>Sơn – Dung dịch</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Mr.Hobby', event)">Sơn Mr.Hobby</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Tamiya', event)">Dung dịch Tamiya</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Panel Line', event)">Bút kẻ lằn Panel Line</div>
+                        </div>
+                    </div>
+                    <div class="sub-nav-item" onclick="filterSubNav('Anime Figure')">
+                        <span>Mô Hình Hãng Khác</span>
+                    </div>
+                    <div class="sub-nav-item" onclick="filterSubNav('Lắp sẵn')">
+                        <span>Mô Hình Lắp Sẵn</span>
+                    </div>
+                    <div class="sub-nav-item has-dropdown" onclick="toggleDropdown(event, this)">
+                        <span>Sản Phẩm Khác</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Áo thun', event)">Áo thun Mecha</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Poster', event)">Poster Anime</div>
+                            <div class="dropdown-item" onclick="filterSubNavSeries('Đèn LED', event)">Đèn LED Gundam</div>
+                        </div>
+                    </div>
+                    <div class="sub-nav-item" onclick="filterSubNav('Đặt trước')">
+                        <span>Hàng Đặt Trước</span>
+                    </div>
+                    <div class="sub-nav-item has-dropdown" onclick="toggleDropdown(event, this)">
+                        <span>Thông tin</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item" onclick="showInfoModal()">Về cửa hàng</div>
+                            <div class="dropdown-item" onclick="showToast('Chính sách giao hàng: Toàn quốc, COD đồng kiểm!', 'info')">Chính sách vận chuyển</div>
+                            <div class="dropdown-item" onclick="showToast('Hỗ trợ lắp ráp mô hình: Nhắn tin cho AI Chatbot bên góc phải!', 'info')">Hướng dẫn lắp ráp</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-nav-phone">
+                    <svg viewBox="0 0 24 24" class="phone-icon"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    <span>0905377495</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-layout">
+        <!-- Sidebar Filters -->
+        <aside class="filter-sidebar" id="filter-sidebar">
+            <div class="sidebar-title">
+                <span>BỘ LỌC CHI TIẾT</span>
+                <button class="clear-filter-btn" onclick="clearAllFilters()">XÓA HẾT</button>
+            </div>
+
+            <!-- Categories -->
+            <div class="filter-group">
+                <div class="filter-group-title">Danh mục</div>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" class="category-checkbox" value="Gundam"> Gundam Gunpla
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="category-checkbox" value="Anime Figure"> Anime Figure
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="category-checkbox" value="Dụng cụ"> Dụng cụ lắp ráp
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="category-checkbox" value="Phụ kiện"> Phụ kiện đi kèm
+                    </label>
+                </div>
+            </div>
+
+            <!-- Grades -->
+            <div class="filter-group">
+                <div class="filter-group-title">Dòng mô hình (Grade)</div>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" class="grade-checkbox" value="SD"> SD (Super Deformed)
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="grade-checkbox" value="HG"> HG (High Grade)
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="grade-checkbox" value="RG"> RG (Real Grade)
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="grade-checkbox" value="MG"> MG (Master Grade)
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="grade-checkbox" value="PG"> PG (Perfect Grade)
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Product storefront page -->
+        <section id="store-content">
+            <!-- Promo banner -->
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <span class="banner-badge">Hệ thống Tích hợp AI</span>
+                    <h2 class="banner-title">Thế Giới Gunpla & Anime Figure</h2>
+                    <p class="banner-desc">Sử dụng Trợ lý ảo AI bên dưới góc màn hình để được tư vấn phân cấp dòng Gundam (HG, RG, MG) phù hợp, hoặc tải ảnh để quét tìm mô hình.</p>
+                </div>
+            </div>
+
+            <!-- Products header -->
+            <div class="products-header">
+                <span class="product-count" id="product-count-text">Đang tải sản phẩm...</span>
+                <div style="display: flex; gap: 0.8rem; align-items: center;">
+                    <button id="quick-add-product-btn" class="add-to-cart-btn" style="display: none; background: var(--accent-green); color: var(--bg-base); font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-family: var(--font-outfit); cursor: pointer; align-items: center; gap: 0.3rem;" onclick="openAddProductModal()">
+                        <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        Thêm sản phẩm
+                    </button>
+                    <select class="sort-select" id="sort-select">
+                        <option value="default">Sắp xếp: Mặc định</option>
+                        <option value="price-asc">Giá: Thấp đến Cao</option>
+                        <option value="price-desc">Giá: Cao đến Thấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-grid">
+                <!-- Products dynamically rendered by app.js -->
+            </div>
+        </section>
+
+        <!-- Admin Dashboard Section -->
+        <section id="admin-dashboard" style="display: none;">
+            <div class="admin-grid">
+                <div class="admin-nav">
+                    <div class="admin-nav-item active">Thống kê & Đơn hàng</div>
+                </div>
+
+                <div class="admin-content">
+                    <h2 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Hệ Thống Quản Trị Cửa Hàng</h2>
+                    
+                    <!-- Stats widgets -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Doanh thu doanh nghiệp</div>
+                            <div class="stat-val" id="stat-total-revenue">0đ</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Số đơn đã đặt</div>
+                            <div class="stat-val" id="stat-total-orders">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Đơn hàng chờ duyệt</div>
+                            <div class="stat-val" id="stat-pending-orders">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Tổng số mô hình</div>
+                            <div class="stat-val" id="stat-total-items">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Orders table -->
+                    <h3 style="margin-top: 2rem;">Danh sách Đơn đặt hàng của khách</h3>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Phương thức</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-table-body">
+                                <!-- Order lists dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Products management -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 3rem;">
+                        <h3>Danh mục sản phẩm trong Kho</h3>
+                        <button class="btn-primary" style="max-width: 200px; padding: 0.5rem 1rem;" onclick="openAddProductModal()">+ Thêm mô hình</button>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên mô hình</th>
+                                    <th>Thể loại</th>
+                                    <th>Phân hạng</th>
+                                    <th>Giá bán</th>
+                                    <th>Tồn kho</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-products-table-body">
+                                <!-- Products list admin -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Đồ Án Tốt Nghiệp: <b>Xây dựng hệ thống thương mại điện tử Gundam/Anime tích hợp Trí tuệ nhân tạo</b></p>
+        <p>Phát triển bởi: <span>Sinh viên thực hiện</span> | Công nghệ: C# ASP.NET Core, FastAPI Python, ReactJS</p>
+    </footer>
+</div>
+
+<!-- Floating AI Chatbot Widget -->
+<div class="ai-chatbot-widget" id="ai-chatbot-widget">
+    <button class="chat-trigger-btn" id="chat-trigger-btn">
+        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: var(--bg-base);">
+            <path d="M12 2c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l2.79-2.79C10.09 18.64 11.02 19 12 19c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm-2.5-7c-.83 0-1.5.67-1.5 1.5S8.67 13 9.5 13s1.5-.67 1.5-1.5S10.33 10 9.5 10zm5 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/>
+        </svg>
+        <div class="chat-badge" id="chat-badge">AI</div>
+    </button>
+    
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-bot-avatar">🤖</div>
+                <div class="chat-bot-status">
+                    <h3>Trợ Lý Tư Vấn Gunpla AI</h3>
+                    <span>Đang hoạt động (RAG)</span>
+                </div>
+            </div>
+            <button class="close-chat-btn" onclick="closeModal('chat-window')">×</button>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="msg incoming">
+                Xin chào! Mình là trợ lý tư vấn Gundam/Anime AI. Bạn đang muốn tìm dòng mô hình nào (HG, RG, MG, PG) hoặc cần hỗ trợ dụng cụ lắp ráp?
+            </div>
+        </div>
+
+        <!-- Suggested questions -->
+        <div class="chat-suggested-questions">
+            <button class="suggested-q-btn" onclick="sendChatMessage('Mới tập chơi Gundam nên chọn dòng nào?')">Mới chơi chọn dòng nào?</button>
+            <button class="suggested-q-btn" onclick="sendChatMessage('Phân biệt dòng HG, RG và MG?')">Phân biệt HG, RG, MG?</button>
+            <button class="suggested-q-btn" onclick="sendChatMessage('Tìm Gundam giá rẻ dưới 500k?')">Tìm Gundam dưới 500k</button>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Hỏi AI tư vấn nhập môn...">
+            <button class="send-chat-btn" onclick="sendChatMessage()">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Product Details -->
+<div class="modal" id="product-modal">
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="closeModal('product-modal')">×</button>
+        <div id="product-detail-modal-body">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Visual Search (Camera Upload) -->
+<div class="modal" id="visual-search-modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="modal-close-btn" onclick="closeModal('visual-search-modal')">×</button>
+        <div class="visual-search-layout">
+            <h2 style="margin-bottom:1rem;">Tìm kiếm mô hình bằng Hình ảnh</h2>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5rem;">Tải ảnh Gundam hoặc Anime lên để mô hình AI trích xuất vector embeddings đối sánh cơ sở dữ liệu.</p>
+            
+            <div class="upload-zone" id="upload-zone">
+                <div class="scan-line" id="scan-line"></div>
+                <div class="upload-icon" id="upload-icon">📸</div>
+                <div class="upload-text" id="upload-text">
+                    <h3>Kéo thả ảnh vào đây hoặc bấm để chọn</h3>
+                    <p>Hỗ trợ định dạng JPG, PNG</p>
+                </div>
+                <div class="upload-preview" id="upload-preview">
+                    <img id="upload-preview-img" src="" alt="Upload Preview">
+                </div>
+            </div>
+
+            <!-- Analyzing feedback -->
+            <div class="analyzing-overlay" id="analyzing-overlay">
+                <div class="spinner"></div>
+                <div style="font-size:0.9rem;color:var(--accent-cyan);font-weight:600;letter-spacing:1px;">AI ĐANG TRÍCH XUẤT ĐẶC TRƯNG ẢNH...</div>
+            </div>
+
+            <!-- Sample simulation triggers -->
+            <div class="sample-images-container">
+                <div class="sample-images-title">Hoặc chọn nhanh ảnh mẫu có sẵn để Test AI:</div>
+                <div class="sample-images-grid">
+                    <div class="sample-img-item" onclick="selectSampleSearch('aerial')">
+                        <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=80&q=80" alt="Aerial">
+                        <div class="sample-img-label">Aerial</div>
+                    </div>
+                    <div class="sample-img-item" onclick="selectSampleSearch('barbatos')">
+                        <img src="https://images.unsplash.com/photo-1608889175123-8ec330b86f84?auto=format&fit=crop&w=80&q=80" alt="Barbatos">
+                        <div class="sample-img-label">Barbatos</div>
+                    </div>
+                    <div class="sample-img-item" onclick="selectSampleSearch('exia')">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=80&q=80" alt="SD Exia">
+                        <div class="sample-img-label">SD Exia</div>
+                    </div>
+                    <div class="sample-img-item" onclick="selectSampleSearch('naruto')">
+                        <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=80&q=80" alt="Naruto">
+                        <div class="sample-img-label">Naruto</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cart & Checkout -->
+<div class="modal" id="cart-modal">
+    <div class="modal-content" style="max-width: 900px;">
+        <button class="modal-close-btn" onclick="closeModal('cart-modal')">×</button>
+        <div style="padding: 2rem;">
+            <h2 style="margin-bottom:1.5rem;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Giỏ Hàng Của Bạn</h2>
+
+            <!-- Main Cart Flow -->
+            <div id="cart-items-wrapper">
+                <div class="cart-layout">
+                    <div class="cart-items-container" id="cart-items-list">
+                        <!-- Dynamically filled -->
+                    </div>
+
+                    <div class="cart-summary">
+                        <h3 style="margin-bottom: 1rem;">Tóm tắt đơn hàng</h3>
+                        <div class="summary-row">
+                            <span>Tạm tính</span>
+                            <span id="cart-total-text">0đ</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Phí vận chuyển</span>
+                            <span style="color:var(--accent-green);">Miễn phí</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Tổng thanh toán</span>
+                            <span id="cart-total-text">0đ</span>
+                        </div>
+                        <button class="btn-primary" style="width:100%; margin-top:1.5rem;" onclick="checkout()">TIẾN HÀNH THANH TOÁN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Area (hidden by default) -->
+            <div id="checkout-area" style="display: none; max-width: 600px; margin: 0 auto;">
+                <h3 style="margin-bottom: 1.2rem;">Thông Tin Nhận Hàng & Thanh Toán</h3>
+                <div class="form-group">
+                    <label>Họ và Tên</label>
+                    <input type="text" id="shipping-name" placeholder="Ví dụ: Nguyễn Văn A">
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" placeholder="Ví dụ: 0987654321">
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ nhận hàng</label>
+                    <textarea id="shipping-address" rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
+                </div>
+
+                <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+                    <button class="btn-primary" style="background:#0055ff; color:white;" onclick="submitOrder('VNPAY')">Thanh toán VNPAY (Giả lập)</button>
+                    <button class="btn-primary" style="background:var(--accent-orange); color:white;" onclick="submitOrder('COD')">Thanh toán COD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Modal: Shop Info -->
+<div class="modal" id="info-modal">
+    <div class="modal-content" style="max-width: 450px; padding: 2.5rem;">
+        <button class="modal-close-btn" onclick="closeModal('info-modal')">×</button>
+        <h2 style="margin-bottom: 1.5rem; color: var(--accent-cyan); font-weight: 800; text-align: center;">THÔNG TIN CỬA HÀNG</h2>
+        <div style="text-align: left; line-height: 2;">
+            <p><strong>🏪 Tên shop:</strong> Mecha Store A.I</p>
+            <p><strong>📍 Địa chỉ:</strong> 123 Trường Chinh, Q. Tân Bình, TP.HCM</p>
+            <p><strong>📞 Hotline:</strong> 0905377495</p>
+            <p><strong>✉️ Email:</strong> support@mechastore.com</p>
+            <p><strong>🤖 Chuyên ngành:</strong> Mô hình lắp ráp nhựa Gundam Gunpla, Anime Figure, Dụng cụ & Phụ kiện chính hãng.</p>
+            <p><strong>💡 Tính năng A.I:</strong> Trợ lý tư vấn mua hàng RAG Chatbot và Tìm kiếm thông tin qua ảnh quét Visual Search.</p>
+        </div>
+        <button class="btn-primary" style="margin-top: 1.5rem; width: 100%;" onclick="closeModal('info-modal')">ĐÓNG</button>
+    </div>
+</div>
+
+<script src="app.js?v=2"></script>
+</body>
+</html>
