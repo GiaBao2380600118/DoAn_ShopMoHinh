@@ -1,9 +1,10 @@
 // Simulated Database
 const INITIAL_PRODUCTS = [];
 
-// API Configuration for Multi-device Synchronization via LAN
-const API_URL = "http://192.168.8.177:5000/api";
-const AI_API_URL = "http://192.168.8.177:8000/api/ai"; // Đường dẫn API của Python AI Service
+// API Configuration for Multi-device Synchronization (Tự động nhận diện localhost hoặc IP LAN)
+const CURRENT_HOST = window.location.hostname || "localhost";
+const API_URL = `http://${CURRENT_HOST}:5000/api`;
+const AI_API_URL = `http://${CURRENT_HOST}:8000/api/ai`;
 let useRealAPI = false;
 
 async function checkBackendConnection() {

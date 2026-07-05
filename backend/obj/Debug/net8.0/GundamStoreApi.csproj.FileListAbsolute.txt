@@ -129,3 +129,4 @@ D:\Đồ_Án_CNGB\backend\obj\Debug\net8.0\refint\GundamStoreApi.dll
 D:\Đồ_Án_CNGB\backend\obj\Debug\net8.0\GundamStoreApi.pdb
 D:\Đồ_Án_CNGB\backend\obj\Debug\net8.0\GundamStoreApi.genruntimeconfig.cache
 D:\Đồ_Án_CNGB\backend\obj\Debug\net8.0\ref\GundamStoreApi.dll
+D:\Đồ_Án_CNGB\backend\obj\Debug\net8.0\GundamStoreApi.sourcelink.json
