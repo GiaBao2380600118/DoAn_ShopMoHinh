@@ -181,8 +181,9 @@ async function loadOrdersFromAPI() {
         const res = await fetch(`${API_URL}/orders`);
         if (res.ok) {
             const data = await res.json();
+            const orderList = Array.isArray(data) ? data : (data.value || []);
             // Ánh xạ đơn hàng từ API C# về cấu trúc dữ liệu hiển thị của JS
-            orders = data.map(o => ({
+            orders = orderList.map(o => ({
                 id: o.orderID.toString(),
                 customer: o.notes ? o.notes.replace("Khách mua hàng: ", "") : (o.user ? o.user.username : "Khách hàng ẩn danh"),
                 email: o.user ? o.user.email : "guest@gmail.com",
