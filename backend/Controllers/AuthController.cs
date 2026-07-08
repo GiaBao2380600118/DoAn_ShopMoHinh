@@ -91,6 +91,54 @@ namespace GundamStoreApi.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.CurrentEmail);
+            if (user == null)
+            {
+                return NotFound("Người dùng không tồn tại.");
+            }
+
+            // Nếu đổi email, kiểm tra xem email mới đã được đăng ký bởi người khác chưa
+            if (dto.CurrentEmail.ToLower() != dto.NewEmail.ToLower())
+            {
+                if (await _context.Users.AnyAsync(u => u.Email == dto.NewEmail))
+                {
+                    return BadRequest("Email mới đã được đăng ký bởi tài khoản khác.");
+                }
+            }
+
+            user.FullName = dto.FullName;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.Address = dto.Address;
+            user.Email = dto.NewEmail; // Liên kết Gmail mới
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật thông tin tài khoản thành công!", email = user.Email, fullName = user.FullName });
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var currentPasswordHash = Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(dto.CurrentPassword))
+            );
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email && u.PasswordHash == currentPasswordHash);
+            if (user == null)
+            {
+                return BadRequest("Mật khẩu hiện tại không chính xác.");
+            }
+
+            var newPasswordHash = Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(dto.NewPassword))
+            );
+            user.PasswordHash = newPasswordHash;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Đổi mật khẩu thành công!" });
+        }
     }
 
     public class RegisterDto
@@ -106,5 +154,21 @@ namespace GundamStoreApi.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class UpdateProfileDto
+    {
+        public string CurrentEmail { get; set; } = string.Empty;
+        public string NewEmail { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

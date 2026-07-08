@@ -976,11 +976,19 @@ function renderOrders() {
             <td>${o.customer}</td>
             <td>${o.date}</td>
             <td><b>${formatVND(o.total)}</b></td>
-            <td>${o.payment}</td>
+            <td>
+                ${o.payment}
+                ${o.payment === 'VNPAY' && o.status === 'Pending' ? '<span style="font-size:0.75rem;color:var(--accent-cyan);display:block;">(Chờ duyệt)</span>' : ''}
+                ${o.payment === 'VNPAY' && o.status !== 'Pending' ? '<span style="font-size:0.75rem;color:#39ff14;display:block;">(Đã xác nhận)</span>' : ''}
+            </td>
             <td>${statusBadge}</td>
             <td class="admin-actions-cell">
-                ${o.status === 'Pending' ? `<button class="btn-small btn-edit" onclick="updateOrderStatus('${o.id}', 'Shipping')">Giao hàng</button>` : ''}
-                ${o.status === 'Shipping' ? `<button class="btn-small btn-edit" style="border-color:#39ff14;color:#39ff14;" onclick="updateOrderStatus('${o.id}', 'Completed')">Hoàn thành</button>` : ''}
+                ${o.status === 'Pending' ? (
+                    o.payment === 'VNPAY' 
+                    ? `<button class="btn-small btn-edit" style="border-color:#00f3ff;color:#00f3ff;" onclick="updateOrderStatus('${o.id}', 'Shipping')">Duyệt & Xác nhận Online</button>`
+                    : `<button class="btn-small btn-edit" onclick="updateOrderStatus('${o.id}', 'Shipping')">Duyệt đơn (Ship COD)</button>`
+                ) : ''}
+                ${o.status === 'Shipping' ? `<button class="btn-small btn-edit" style="border-color:#39ff14;color:#39ff14;" onclick="updateOrderStatus('${o.id}', 'Completed')">Hoàn thành đơn</button>` : ''}
                 <button class="btn-small btn-delete" onclick="deleteOrder('${o.id}')">Hủy</button>
             </td>
         `;
@@ -1179,6 +1187,7 @@ function updateAuthUI() {
         userDisplayName.innerText = currentUser.name;
         userDisplayName.style.display = "inline";
         loginBtn.style.display = "none";
+        document.getElementById("profile-nav-btn").style.display = "inline-block";
         logoutBtn.style.display = "inline";
         
         // Chỉ hiển thị liên kết trang quản trị nếu là Admin
@@ -1192,6 +1201,7 @@ function updateAuthUI() {
     } else {
         userDisplayName.style.display = "none";
         loginBtn.style.display = "inline";
+        document.getElementById("profile-nav-btn").style.display = "none";
         logoutBtn.style.display = "none";
         adminNavLink.style.display = "none"; // Ẩn hoàn toàn khi chưa đăng nhập
         if (quickAddBtn) quickAddBtn.style.display = "none";
@@ -1265,5 +1275,198 @@ window.editProductInline = async function(productId, event) {
         renderProducts();
         renderAdminProducts();
         renderStats();
+    }
+    }
+};
+
+// --- PROFILE & SECURITY MODULE ---
+let phoneVerified = false;
+let otpSent = false;
+
+window.openAccountModal = function() {
+    if (!currentUser) {
+        showToast("Vui lòng đăng nhập để xem thông tin tài khoản!", "error");
+        return;
+    }
+    
+    // Mặc định mở tab Profile hồ sơ
+    switchAccountTab('profile');
+
+    // Nạp dữ liệu vào form
+    document.getElementById("profile-fullname").value = currentUser.name || "";
+    document.getElementById("profile-email").value = currentUser.email || "";
+    document.getElementById("profile-phone").value = currentUser.phone || "0905377495";
+    document.getElementById("profile-address").value = currentUser.address || "123 Trường Chinh, Q. Tân Bình, TP.HCM";
+
+    // Thiết lập trạng thái OTP
+    document.getElementById("otp-verification-area").style.display = "none";
+    if (phoneVerified) {
+        document.getElementById("phone-verified-badge").style.display = "inline-block";
+        document.getElementById("send-otp-btn").style.display = "none";
+    } else {
+        document.getElementById("phone-verified-badge").style.display = "none";
+        document.getElementById("send-otp-btn").style.display = "inline-block";
+    }
+
+    openModal('account-modal');
+};
+
+window.switchAccountTab = function(tab) {
+    const tabProfile = document.getElementById("tab-btn-profile");
+    const tabPassword = document.getElementById("tab-btn-password");
+    const sectionProfile = document.getElementById("account-profile-section");
+    const sectionPassword = document.getElementById("account-password-section");
+
+    if (tab === 'profile') {
+        tabProfile.style.background = "rgba(0, 243, 255, 0.15)";
+        tabProfile.style.borderColor = "var(--accent-cyan)";
+        tabProfile.style.color = "var(--accent-cyan)";
+        
+        tabPassword.style.background = "transparent";
+        tabPassword.style.borderColor = "var(--border-color)";
+        tabPassword.style.color = "var(--text-secondary)";
+
+        sectionProfile.style.display = "block";
+        sectionPassword.style.display = "none";
+    } else {
+        tabPassword.style.background = "rgba(0, 243, 255, 0.15)";
+        tabPassword.style.borderColor = "var(--accent-cyan)";
+        tabPassword.style.color = "var(--accent-cyan)";
+
+        tabProfile.style.background = "transparent";
+        tabProfile.style.borderColor = "var(--border-color)";
+        tabProfile.style.color = "var(--text-secondary)";
+
+        sectionProfile.style.display = "none";
+        sectionPassword.style.display = "block";
+    }
+};
+
+window.sendOTP = function() {
+    const phone = document.getElementById("profile-phone").value.trim();
+    if (!phone) {
+        showToast("Vui lòng nhập số điện thoại trước khi xác thực!", "error");
+        return;
+    }
+    
+    otpSent = true;
+    document.getElementById("otp-verification-area").style.display = "block";
+    showToast(`[SMS] Đã gửi mã xác thực OTP 123456 đến số điện thoại ${phone}!`, "success");
+};
+
+window.verifyOTP = function() {
+    const code = document.getElementById("otp-code-input").value.trim();
+    if (code === "123456") {
+        phoneVerified = true;
+        document.getElementById("otp-verification-area").style.display = "none";
+        document.getElementById("phone-verified-badge").style.display = "inline-block";
+        document.getElementById("send-otp-btn").style.display = "none";
+        showToast("Số điện thoại đã được xác thực OTP thành công!", "success");
+    } else {
+        showToast("Mã xác thực OTP không chính xác. Vui lòng nhập mã mẫu: 123456", "error");
+    }
+};
+
+window.updateAccountProfile = async function() {
+    const newName = document.getElementById("profile-fullname").value.trim();
+    const newEmail = document.getElementById("profile-email").value.trim();
+    const phone = document.getElementById("profile-phone").value.trim();
+    const address = document.getElementById("profile-address").value.trim();
+
+    if (!newName || !newEmail) {
+        showToast("Họ tên và Email không được bỏ trống!", "error");
+        return;
+    }
+
+    if (useRealAPI) {
+        try {
+            const res = await fetch(`${API_URL}/auth/update-profile`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    currentEmail: currentUser.email,
+                    newEmail: newEmail,
+                    fullName: newName,
+                    phoneNumber: phone,
+                    address: address
+                })
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                currentUser.name = data.fullName;
+                currentUser.email = data.email;
+                currentUser.phone = phone;
+                currentUser.address = address;
+                
+                localStorage.setItem("gundam_current_user", JSON.stringify(currentUser));
+                updateAuthUI();
+                showToast("Cập nhật thông tin tài khoản và Gmail liên kết lên SQL Server thành công!", "success");
+            } else {
+                const errText = await res.text();
+                showToast(errText || "Lỗi cập nhật thông tin tài khoản!", "error");
+            }
+        } catch (e) {
+            showToast("Lỗi kết nối máy chủ để cập nhật profile!", "error");
+        }
+    } else {
+        // Cập nhật offline cục bộ
+        currentUser.name = newName;
+        currentUser.email = newEmail;
+        currentUser.phone = phone;
+        currentUser.address = address;
+        
+        localStorage.setItem("gundam_current_user", JSON.stringify(currentUser));
+        updateAuthUI();
+        showToast("Cập nhật thông tin tài khoản thành công (Offline)!", "success");
+    }
+};
+
+window.updateAccountPassword = async function() {
+    const curPass = document.getElementById("pass-current").value;
+    const newPass = document.getElementById("pass-new").value;
+    const confPass = document.getElementById("pass-confirm").value;
+
+    if (!curPass || !newPass || !confPass) {
+        showToast("Vui lòng điền đầy đủ các thông tin mật khẩu!", "error");
+        return;
+    }
+
+    if (newPass !== confPass) {
+        showToast("Mật khẩu mới và xác nhận mật khẩu không khớp!", "error");
+        return;
+    }
+
+    if (useRealAPI) {
+        try {
+            const res = await fetch(`${API_URL}/auth/change-password`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: currentUser.email,
+                    currentPassword: curPass,
+                    newPassword: newPass
+                })
+            });
+            if (res.ok) {
+                showToast("Đổi mật khẩu thành công trên hệ thống SQL Server!", "success");
+                document.getElementById("pass-current").value = "";
+                document.getElementById("pass-new").value = "";
+                document.getElementById("pass-confirm").value = "";
+                switchAccountTab('profile');
+            } else {
+                const errText = await res.text();
+                showToast(errText || "Đổi mật khẩu thất bại!", "error");
+            }
+        } catch (e) {
+            showToast("Lỗi kết nối máy chủ để đổi mật khẩu!", "error");
+        }
+    } else {
+        // Cập nhật offline giả lập
+        showToast("Đổi mật khẩu thành công (Offline)!", "success");
+        document.getElementById("pass-current").value = "";
+        document.getElementById("pass-new").value = "";
+        document.getElementById("pass-confirm").value = "";
+        switchAccountTab('profile');
     }
 };

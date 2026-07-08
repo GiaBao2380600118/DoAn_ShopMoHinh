@@ -262,7 +262,7 @@
         }
 
         // Handle Login Submission
-        function submitLoginPageLogin() {
+        async function submitLoginPageLogin() {
             const email = document.getElementById("auth-email").value.trim();
             const pass = document.getElementById("auth-password").value;
 
@@ -271,22 +271,52 @@
                 return;
             }
 
-            // Find in SIMULATED_USERS
+            const API_URL = `http://${window.location.hostname}:5000/api`;
+            try {
+                // Đăng nhập qua API C# thực tế
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password: pass })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const matchedUser = {
+                        email: email,
+                        name: data.fullName || "Người dùng",
+                        role: data.role || "Customer",
+                        token: data.token,
+                        phone: "0905377495", // Số điện thoại mẫu để xác thực
+                        address: "123 Trường Chinh, Q. Tân Bình, TP.HCM"
+                    };
+                    localStorage.setItem("gundam_current_user", JSON.stringify(matchedUser));
+                    showPageToast("Đăng nhập thành công! Đang chuyển hướng...", "success");
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1000);
+                    return;
+                } else {
+                    const errMsg = await res.text();
+                    showPageToast(errMsg || "Đăng nhập thất bại!", "error");
+                    return;
+                }
+            } catch (err) {
+                console.log("C# Auth API offline, dùng tài khoản Local.");
+            }
+
+            // Fallback: Tìm trong SIMULATED_USERS hoặc LocalStorage đăng ký offline
             const user = SIMULATED_USERS.find(u => u.email === email && u.password === pass);
-            
-            // Check if there are registered users in localStorage
             let localUsers = localStorage.getItem("gundam_registered_users")
                 ? JSON.parse(localStorage.getItem("gundam_registered_users"))
                 : [];
             
             const localUser = localUsers.find(u => u.email === email && u.password === pass);
-            
             const matchedUser = user || localUser;
 
             if (matchedUser) {
-                // Save user login session
                 localStorage.setItem("gundam_current_user", JSON.stringify(matchedUser));
-                showPageToast("Đăng nhập thành công! Đang chuyển hướng...", "success");
+                showPageToast("Đăng nhập Offline thành công! Đang chuyển hướng...", "success");
                 setTimeout(() => {
                     window.location.href = "index.html";
                 }, 1000);
@@ -296,7 +326,7 @@
         }
 
         // Handle Register Submission
-        function submitLoginPageRegister() {
+        async function submitLoginPageRegister() {
             const name = document.getElementById("reg-name").value.trim();
             const email = document.getElementById("reg-email").value.trim();
             const pass = document.getElementById("reg-password").value;
@@ -306,7 +336,35 @@
                 return;
             }
 
-            // Simple validation
+            const API_URL = `http://${window.location.hostname}:5000/api`;
+            try {
+                // Đăng ký qua API C# thực tế
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: email,
+                        password: pass,
+                        fullName: name,
+                        address: "Chưa cập nhật",
+                        phoneNumber: "Chưa cập nhật"
+                    })
+                });
+                
+                if (res.ok) {
+                    showPageToast("Đăng ký thành công! Vui lòng đăng nhập.", "success");
+                    toggleAuthMode(); // Chuyển sang màn hình đăng nhập
+                    return;
+                } else {
+                    const errMsg = await res.text();
+                    showPageToast(errMsg || "Đăng ký thất bại!", "error");
+                    return;
+                }
+            } catch (err) {
+                console.log("C# Auth API offline, đăng ký Local.");
+            }
+
+            // Fallback: Đăng ký offline lưu ở LocalStorage
             let localUsers = localStorage.getItem("gundam_registered_users")
                 ? JSON.parse(localStorage.getItem("gundam_registered_users"))
                 : [];
@@ -316,7 +374,6 @@
                 return;
             }
 
-            // Save new user
             const newUser = {
                 id: Date.now(),
                 email: email,
@@ -328,7 +385,7 @@
             localUsers.push(newUser);
             localStorage.setItem("gundam_registered_users", JSON.stringify(localUsers));
             
-            showPageToast("Đăng ký thành công! Đang tự động đăng nhập...", "success");
+            showPageToast("Đăng ký Offline thành công! Đang tự động đăng nhập...", "success");
             localStorage.setItem("gundam_current_user", JSON.stringify(newUser));
             
             setTimeout(() => {
