@@ -97,9 +97,6 @@ async def chat_bot(request: ChatRequest):
     # 2. Nếu có API Key, gọi trực tiếp Gemini API thực tế
     if api_key:
         try:
-            url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
-            headers = {"Content-Type": "application/json"}
-            
             # Cấu hình system instruction để Gemini đóng vai nhân viên bán hàng mô hình Mecha Store
             system_instruction = (
                 "Bạn là Trợ lý ảo AI thông minh, đóng vai trò nhân viên tư vấn bán hàng nhiệt tình, am hiểu tại Mecha Store. "
@@ -131,17 +128,34 @@ async def chat_bot(request: ChatRequest):
                     "maxOutputTokens": 800
                 }
             }
-            
-            response = requests.post(url, headers=headers, json=payload, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                reply_text = data["candidates"][0]["content"]["parts"][0]["text"]
+
+            headers = {"Content-Type": "application/json"}
+
+            # Thử gọi lần lượt các mô hình khác nhau để đảm bảo tương thích mọi API Key
+            models_to_try = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro", "gemini-1.5-flash-latest"]
+            success = False
+            reply_text = ""
+
+            for model_name in models_to_try:
+                try:
+                    url = f"https://generativelanguage.googleapis.com/v1/models/{model_name}:generateContent?key={api_key}"
+                    response = requests.post(url, headers=headers, json=payload, timeout=10)
+                    if response.status_code == 200:
+                        data = response.json()
+                        reply_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                        success = True
+                        print(f"Successfully generated response using model: {model_name}")
+                        break
+                    else:
+                        print(f"Model {model_name} returned error {response.status_code}: {response.text}")
+                except Exception as model_err:
+                    print(f"Failed to call model {model_name}: {model_err}")
+
+            if success:
                 return {
                     "reply": reply_text,
                     "suggested_products": []
                 }
-            else:
-                print(f"Gemini API returned error code {response.status_code}: {response.text}")
         except Exception as err:
             print(f"Error calling Gemini API: {err}")
 

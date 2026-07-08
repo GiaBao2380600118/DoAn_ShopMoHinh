@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GundamStoreApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d1e6229db9aa59e2a5219219283b207d2cd7c4ee")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a573ec62db1c0748f82363e67bc5c843974f1d09")]
 [assembly: System.Reflection.AssemblyProductAttribute("GundamStoreApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GundamStoreApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
