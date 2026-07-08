@@ -174,6 +174,31 @@ async function syncLocalProductsToSQL() {
     }
 }
 
+// Tải danh sách đơn hàng từ C# Backend API để đồng bộ doanh thu
+async function loadOrdersFromAPI() {
+    if (!useRealAPI) return;
+    try {
+        const res = await fetch(`${API_URL}/orders`);
+        if (res.ok) {
+            const data = await res.json();
+            // Ánh xạ đơn hàng từ API C# về cấu trúc dữ liệu hiển thị của JS
+            orders = data.map(o => ({
+                id: o.orderID.toString(),
+                customer: o.notes ? o.notes.replace("Khách mua hàng: ", "") : (o.user ? o.user.username : "Khách hàng ẩn danh"),
+                email: o.user ? o.user.email : "guest@gmail.com",
+                date: o.orderDate ? o.orderDate.split('T')[0] : new Date().toISOString().split('T')[0],
+                total: o.totalAmount,
+                status: o.orderStatus, // "Pending", "Shipping", "Completed"
+                payment: o.paymentMethod,
+                address: o.shippingAddress
+            }));
+        }
+    } catch (e) {
+        console.error("Lỗi khi tải đơn hàng từ SQL Server:", e);
+    }
+}
+
+
 // Initialize application
 document.addEventListener("DOMContentLoaded", async () => {
     // Tự động dọn dẹp bộ nhớ đệm cũ để chuyển sang cửa hàng trống cho khách tự thêm
@@ -190,6 +215,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Đồng bộ sản phẩm từ localStorage lên SQL Server nếu kết nối thành công
     await syncLocalProductsToSQL();
+    
+    // Đồng bộ đơn hàng từ SQL Server về nếu kết nối thành công
+    await loadOrdersFromAPI();
     
     updateAuthUI(); // Phục hồi trạng thái đăng nhập của tài khoản
     renderProducts();
@@ -521,8 +549,9 @@ async function submitOrder(paymentMethod) {
                 updateCartUI();
                 closeModal('cart-modal');
                 
-                // Đồng bộ lại sản phẩm để cập nhật số lượng tồn kho mới nhất từ SQL Server
+                // Đồng bộ lại sản phẩm và đơn hàng để cập nhật số lượng tồn kho và doanh thu mới nhất
                 await loadProductsFromAPI();
+                await loadOrdersFromAPI();
                 renderProducts();
                 renderAdminProducts();
                 renderStats();
@@ -958,14 +987,34 @@ function renderOrders() {
     });
 }
 
-function updateOrderStatus(orderId, newStatus) {
-    const o = orders.find(o => o.id === orderId);
-    if (o) {
-        o.status = newStatus;
-        saveToLocalStorage(); // Lưu trạng thái
-        showToast(`Đã cập nhật trạng thái đơn hàng ${orderId} thành ${newStatus}`, "success");
-        renderOrders();
-        renderStats();
+async function updateOrderStatus(orderId, newStatus) {
+    if (useRealAPI) {
+        try {
+            const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newStatus)
+            });
+            if (res.ok) {
+                showToast(`Đã cập nhật trạng thái đơn hàng ${orderId} thành ${newStatus}`, "success");
+                await loadOrdersFromAPI();
+                renderOrders();
+                renderStats();
+            } else {
+                showToast("Không thể cập nhật trạng thái đơn hàng trên máy chủ!", "error");
+            }
+        } catch (e) {
+            showToast("Lỗi kết nối máy chủ khi cập nhật đơn hàng!", "error");
+        }
+    } else {
+        const o = orders.find(o => o.id === orderId);
+        if (o) {
+            o.status = newStatus;
+            saveToLocalStorage(); // Lưu trạng thái
+            showToast(`Đã cập nhật trạng thái đơn hàng ${orderId} thành ${newStatus}`, "success");
+            renderOrders();
+            renderStats();
+        }
     }
 }
 
